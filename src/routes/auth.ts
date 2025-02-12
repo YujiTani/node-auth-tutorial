@@ -13,6 +13,13 @@ const salt = bcrypt.genSaltSync(10);
 
 const users = []
 
+/**
+ * ユーザーを登録
+ * 
+ * @param req リクエスト
+ * @param res レスポンス
+ * @returns ユーザー情報とcookieを返す
+ */
 router.post('/register', async (req, res) => {
     try {
         const { name, email, password } = userSchema.parse(req.body)
@@ -31,6 +38,7 @@ router.post('/register', async (req, res) => {
     }
     users.push(newUser)
 
+    // ユーザー情報とcookieを返す
     res.status(201).json({ message: 'User registered successfully' })
   } catch (error) {
     res.status(400).json({ error: 'Invalid request' })

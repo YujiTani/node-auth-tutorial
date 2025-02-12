@@ -29,7 +29,7 @@ const app = express();
 app.use(
   session({
     store: redisStore,
-    secret: process.env.SESSION_SECRET_KEY,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { 
@@ -40,6 +40,9 @@ app.use(
     },
   })
 );
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ルーティング
 app.use("/auth", authRouter);

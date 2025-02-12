@@ -4,6 +4,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
+    "client": "bun run  --hot src/client.ts",
     "dev": "bun run --hot src/server.ts",
     "build": "bun build src/server.ts --outdir dist",
     "start": "node dist/server.js"
