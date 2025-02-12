@@ -1,48 +1,47 @@
-import express from 'express'
-import session from 'express-session'
-import Redis from 'redis'
-import connectRedis from 'connect-redis'
-import dotenv from 'dotenv'
+// app.js
+const express = require('express');
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
+const bcrypt = require('bcryptjs');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
-dotenv.config()
+const app = express();
+const redisClient = redis.createClient();
 
-const app = express()
-const PORT = process.env.PORT || 4400
-
-// Redisクライアントの作成
-const redisClient = Redis.createClient({
-    url: process.env.REDIS_URL
-})
-
-// Redisクライアントの接続
-// エラーが発生した場合はコンソールにエラーを出力
-redisClient.connect().catch(console.error)
-
-// RedisStoreの作成
-// RedisStoreはセッションをRedisに保存するためのストア
-const RedisStore = connectRedis(session)
-
-// セッションミドルウェアはセッションを管理するためのミドルウェア
+app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(session({
-    store: new RedisStore({client: redisClient}),
-    secret: process.env.SESSION_SECRET,
-    resave: false, // セッションが変更されない限り保存しない
-    saveUninitialized: false, // 未初期化のセッションは保存しない
-    cookie: {
-        secure: process.env.NODE_ENV === 'production', // 本番環境ではHTTPSを使用
-        httpOnly: true, // クライアントサイドのJavaScriptからはアクセスできない
-        maxAge: 1000 * 60 * 60 * 24 * 30, // 30日
-        sameSite: 'lax', // CSRF攻撃を防ぐため
-        path: '/' // セッションが有効なパス
+    store: new RedisStore({ client: redisClient }),
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // HTTPSを使用する場合はtrueに設定
+}));
+
+// ユーザー情報を保存するための簡易データベース（メモリ内）
+let users = [];
+
+// ユーザー登録エンドポイント
+app.post('/register', async (req: Request, res: Response) => {
+    const { username, password } = req.body;
+
+    // 既に登録されているユーザーか確認
+    const existingUser = users.find((user: { username: string }) => user.username === username);
+    if (existingUser) {
+        return res.status(400).json({ message: 'User already exists' });
     }
-}))
 
-app.use(express.urlencoded({extended: true}))
-app.use(express.json())
+    // パスワードのハッシュ化
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-// 認証用のルーティング
-app.use('/auth', authRoutes);
+    // ユーザー情報を保存
+    users.push({ username, password: hashedPassword });
+    res.status(201).json({ message: 'User registered successfully' });
+});
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+    console.log(`Server is running on port ${PORT}`);
+});

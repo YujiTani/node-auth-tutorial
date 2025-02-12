@@ -2,11 +2,10 @@
   "name": "session-authentication",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --hot server.ts",
-    "build": "bun build server.ts --outdir dist",
+    "dev": "bun run --hot src/server.ts",
+    "build": "bun build src/server.ts --outdir dist",
     "start": "node dist/server.js"
   },
   "keywords": [],
@@ -15,12 +14,15 @@
   "description": "",
   "dependencies": {
     "@types/node": "^22.13.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
     "connect-redis": "^8.0.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "redis": "^4.7.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "zod": "^3.24.2"
   }
 }
