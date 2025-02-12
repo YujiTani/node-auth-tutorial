@@ -6,21 +6,23 @@ import {createClient} from "redis"
 
 import authRouter from "./routes/auth";
 
+// Redisクライアントの作成
 const redisClient = createClient({
     url: process.env.REDIS_URL,
 })
-redisClient.connect().catch(console.error);
+redisClient.connect().catch(console.error); // Redisクライアントの接続 エラーがあればコンソールに表示
 
 // Initialize store.
 const redisStore = new RedisStore({
-    client: redisClient,
-    prefix: "myapp:",
+    client: redisClient, // Redisクライアント
+    prefix: "session:", // セッションのプレフィックス
 })
 
 const dotenv = require("dotenv");
 const envFile = process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : ".env";
 dotenv.config({ path: envFile });
 
+// アプリケーションの作成
 const app = express();
 
 // セッションを開始したときのクッキーへの送信とRedisへの登録の設定
@@ -42,6 +44,7 @@ app.use(
 // ルーティング
 app.use("/auth", authRouter);
 
+// サーバーの起動
 app.listen(4400, () => {
   console.log("Server is running on port 4400");
 });
